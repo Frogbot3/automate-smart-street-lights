@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LumiCore | Smart Street Lights Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-overlay"></div>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <nav class="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-lightbulb neon-text"></i>
+            <h2>Lumi<span>Core</span></h2>
+        </div>
+        <ul class="nav-links">
+            <li class="active"><a href="#"><i class="fa-solid fa-border-all"></i> Dashboard</a></li>
+            <li><a href="#"><i class="fa-solid fa-map-location-dot"></i> Network Map</a></li>
+            <li><a href="#"><i class="fa-solid fa-sliders"></i> Controls</a></li>
+            <li><a href="#"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#"><i class="fa-solid fa-bug"></i> Faults <span class="badge">3</span></a></li>
+            <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        </ul>
+        <div class="sidebar-user">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=028b9d&color=fff" alt="User">
+            <div class="user-info">
+                <h4>System Admin</h4>
+                <p>City Grid Alpha</p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="search-bar">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Search zones, lights, or nodes...">
+            </div>
+            <div class="header-actions">
+                <button class="pulse-btn" aria-label="Notifications"><i class="fa-regular fa-bell"></i><span class="notification-dot"></span></button>
+                <div class="system-status">
+                    <span class="status-indicator online"></span> System Online
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="stats-container">
+                <div class="stat-card glass-panel" style="--delay: 0.1s">
+                    <div class="stat-icon pulse-blue"><i class="fa-solid fa-street-view"></i></div>
+                    <div class="stat-details">
+                        <h3>Total Lights</h3>
+                        <p class="stat-value">12,450</p>
+                        <p class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> 124 this month</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel" style="--delay: 0.2s">
+                    <div class="stat-icon pulse-green"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="stat-details">
+                        <h3>Active & Efficient</h3>
+                        <p class="stat-value">11,980</p>
+                        <p class="stat-trend"><i class="fa-regular fa-clock"></i> live status</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel" style="--delay: 0.3s">
+                    <div class="stat-icon pulse-purple"><i class="fa-solid fa-leaf"></i></div>
+                    <div class="stat-details">
+                        <h3>Energy Saved</h3>
+                        <p class="stat-value">4.2 MW</p>
+                        <p class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> 15% vs last week</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel danger-border" style="--delay: 0.4s">
+                    <div class="stat-icon pulse-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="stat-details">
+                        <h3>Faulty Nodes</h3>
+                        <p class="stat-value text-red">42</p>
+                        <p class="stat-trend negative"><i class="fa-solid fa-arrow-up"></i> action required</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="middle-section">
+                <div class="chart-container glass-panel fade-in-up" style="--delay: 0.5s">
+                    <div class="panel-header">
+                        <h3>Energy Consumption & Savings</h3>
+                        <div class="chart-controls">
+                            <button class="active">Daily</button><button>Weekly</button><button>Monthly</button>
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="energyChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="map-container glass-panel fade-in-up" style="--delay: 0.6s">
+                    <div class="panel-header">
+                        <h3>Live Zone Status</h3>
+                        <button class="icon-btn"><i class="fa-solid fa-expand"></i></button>
+                    </div>
+                    <div class="zone-grid">
+                        <div class="zone-card active-zone tooltip" data-info="Downtown | 4,200 Lights | 98% Perf">
+                            <div class="zone-icon"><i class="fa-solid fa-city"></i></div>
+                            <div class="zone-name">Downtown</div>
+                            <div class="zone-status online-pulse"></div>
+                        </div>
+                        <div class="zone-card active-zone tooltip" data-info="North Suburbs | 2,100 Lights | 100% Perf">
+                            <div class="zone-icon"><i class="fa-solid fa-tree-city"></i></div>
+                            <div class="zone-name">Northwood</div>
+                            <div class="zone-status online-pulse"></div>
+                        </div>
+                        <div class="zone-card warning-zone tooltip" data-info="East Side | 1,800 Lights | 5 Faults">
+                            <div class="zone-icon"><i class="fa-solid fa-industry"></i></div>
+                            <div class="zone-name">East Ind.</div>
+                            <div class="zone-status warn-pulse"></div>
+                        </div>
+                        <div class="zone-card error-zone tooltip" data-info="South End | 800 Lights | 12 Faults">
+                            <div class="zone-icon"><i class="fa-solid fa-bridge"></i></div>
+                            <div class="zone-name">South End</div>
+                            <div class="zone-status error-pulse"></div>
+                        </div>
+                        <div class="zone-card active-zone tooltip" data-info="West River | 3,550 Lights | 99% Perf">
+                            <div class="zone-icon"><i class="fa-solid fa-water"></i></div>
+                            <div class="zone-name">West River</div>
+                            <div class="zone-status online-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-section">
+                <div class="control-panel glass-panel fade-in-up" style="--delay: 0.7s">
+                    <div class="panel-header">
+                        <h3>Intelligent Brightness Control</h3>
+                        <div class="toggle-switch">
+                            <span>Auto AI Mode</span>
+                            <label class="switch">
+                                <input type="checkbox" checked id="autoModeToggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="sliders-container">
+                        <div class="slider-group">
+                            <label>Downtown <span class="val" id="val-dt">80%</span></label>
+                            <input type="range" class="glass-slider" min="0" max="100" value="80" disabled id="slider-dt">
+                        </div>
+                        <div class="slider-group">
+                            <label>Northwood <span class="val" id="val-nw">60%</span></label>
+                            <input type="range" class="glass-slider" min="0" max="100" value="60" disabled id="slider-nw">
+                        </div>
+                        <div class="slider-group">
+                            <label>East Ind. <span class="val" id="val-ei">100%</span></label>
+                            <input type="range" class="glass-slider" min="0" max="100" value="100" disabled id="slider-ei">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fault-log glass-panel fade-in-up" style="--delay: 0.8s">
+                    <div class="panel-header">
+                        <h3>Recent Alerts</h3>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <ul class="fault-list" id="faultList">
+                        <li class="fault-item new">
+                            <div class="fault-icon critical"><i class="fa-solid fa-unlink"></i></div>
+                            <div class="fault-info">
+                                <h4>Connection Lost</h4>
+                                <p>Node ID: #SE-7182 (South End)</p>
+                            </div>
+                            <span class="fault-time">2m ago</span>
+                        </li>
+                        <li class="fault-item">
+                            <div class="fault-icon warning"><i class="fa-solid fa-lightbulb"></i></div>
+                            <div class="fault-info">
+                                <h4>Bulb Failure</h4>
+                                <p>Node ID: #EI-2210 (East Ind.)</p>
+                            </div>
+                            <span class="fault-time">14m ago</span>
+                        </li>
+                        <li class="fault-item text-green">
+                            <div class="fault-icon resolved"><i class="fa-solid fa-check"></i></div>
+                            <div class="fault-info">
+                                <h4>Resolved: Power Spike</h4>
+                                <p>Grid Alpha Restored Automatically</p>
+                            </div>
+                            <span class="fault-time">1h ago</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
