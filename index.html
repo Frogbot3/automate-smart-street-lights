@@ -3,35 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LumiCore | Smart Street Lights Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Dashboard | Smart Street Lights</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="bg-overlay"></div>
-    <div class="bg-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
-
+    <!-- Sidebar Navigation -->
     <nav class="sidebar">
         <div class="logo">
-            <i class="fa-solid fa-lightbulb neon-text"></i>
-            <h2>Lumi<span>Core</span></h2>
+            <i class="fa-solid fa-lightbulb text-primary"></i>
+            <h2>LumiCore</h2>
         </div>
         <ul class="nav-links">
-            <li class="active"><a href="#"><i class="fa-solid fa-border-all"></i> Dashboard</a></li>
-            <li><a href="#"><i class="fa-solid fa-map-location-dot"></i> Network Map</a></li>
-            <li><a href="#"><i class="fa-solid fa-sliders"></i> Controls</a></li>
-            <li><a href="#"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
-            <li><a href="#"><i class="fa-solid fa-bug"></i> Faults <span class="badge">3</span></a></li>
-            <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+            <li class="active"><a href="#"><i class="fa-solid fa-border-all"></i> <span>Dashboard</span></a></li>
+            <li><a href="#"><i class="fa-solid fa-map-location-dot"></i> <span>Network</span></a></li>
+            <li><a href="#"><i class="fa-solid fa-sliders"></i> <span>Controls</span></a></li>
+            <li><a href="#"><i class="fa-solid fa-chart-line"></i> <span>Analytics</span></a></li>
+            <li><a href="#"><i class="fa-solid fa-bug"></i> <span>Faults</span> <div class="badge" id="nav-fault-badge">0</div></a></li>
+            <li><a href="#"><i class="fa-solid fa-gear"></i> <span>Settings</span></a></li>
         </ul>
         <div class="sidebar-user">
-            <img src="https://ui-avatars.com/api/?name=Admin+User&background=028b9d&color=fff" alt="User">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=0e7490&color=fff" alt="User">
             <div class="user-info">
                 <h4>System Admin</h4>
                 <p>City Grid Alpha</p>
@@ -39,62 +38,69 @@
         </div>
     </nav>
 
+    <!-- Main Content Area -->
     <main class="main-content">
         <header class="top-header">
             <div class="search-bar">
                 <i class="fa-solid fa-search"></i>
-                <input type="text" placeholder="Search zones, lights, or nodes...">
+                <input type="text" placeholder="Search components, zones, or nodes...">
             </div>
             <div class="header-actions">
-                <button class="pulse-btn" aria-label="Notifications"><i class="fa-regular fa-bell"></i><span class="notification-dot"></span></button>
+                <button class="icon-btn" id="theme-toggle" aria-label="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                <button class="icon-btn" aria-label="Notifications"><i class="fa-regular fa-bell"></i></button>
                 <div class="system-status">
-                    <span class="status-indicator online"></span> System Online
+                    <span class="status-indicator online"></span>
+                    <span>System Online</span>
                 </div>
             </div>
         </header>
 
         <div class="dashboard-grid">
+            <!-- Top stats cards array -->
             <div class="stats-container">
-                <div class="stat-card glass-panel" style="--delay: 0.1s">
-                    <div class="stat-icon pulse-blue"><i class="fa-solid fa-street-view"></i></div>
+                <div class="card stat-card">
+                    <div class="stat-icon icon-blue"><i class="fa-solid fa-street-view"></i></div>
                     <div class="stat-details">
                         <h3>Total Lights</h3>
-                        <p class="stat-value">12,450</p>
-                        <p class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> 124 this month</p>
+                        <p class="stat-value" id="stat-total">12,450</p>
+                        <p class="stat-trend positive" id="trend-total"><i class="fa-solid fa-check"></i> Network stable</p>
                     </div>
                 </div>
-                <div class="stat-card glass-panel" style="--delay: 0.2s">
-                    <div class="stat-icon pulse-green"><i class="fa-solid fa-bolt"></i></div>
+                <div class="card stat-card">
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-bolt"></i></div>
                     <div class="stat-details">
-                        <h3>Active & Efficient</h3>
-                        <p class="stat-value">11,980</p>
-                        <p class="stat-trend"><i class="fa-regular fa-clock"></i> live status</p>
+                        <h3>Active Brightness</h3>
+                        <p class="stat-value" id="stat-active">80%</p>
+                        <p class="stat-trend text-muted"><i class="fa-regular fa-clock"></i> Global avg</p>
                     </div>
                 </div>
-                <div class="stat-card glass-panel" style="--delay: 0.3s">
-                    <div class="stat-icon pulse-purple"><i class="fa-solid fa-leaf"></i></div>
+                <div class="card stat-card">
+                    <div class="stat-icon icon-purple"><i class="fa-solid fa-leaf"></i></div>
                     <div class="stat-details">
                         <h3>Energy Saved</h3>
-                        <p class="stat-value">4.2 MW</p>
-                        <p class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> 15% vs last week</p>
+                        <p class="stat-value" id="stat-saved">4.2 MW</p>
+                        <p class="stat-trend positive" id="trend-saved"><i class="fa-solid fa-arrow-up"></i> AI Optimized</p>
                     </div>
                 </div>
-                <div class="stat-card glass-panel danger-border" style="--delay: 0.4s">
-                    <div class="stat-icon pulse-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="card stat-card" id="card-faulty">
+                    <div class="stat-icon icon-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <div class="stat-details">
                         <h3>Faulty Nodes</h3>
-                        <p class="stat-value text-red">42</p>
-                        <p class="stat-trend negative"><i class="fa-solid fa-arrow-up"></i> action required</p>
+                        <p class="stat-value text-red" id="stat-faulty">0</p>
+                        <p class="stat-trend negative" id="trend-faulty">0 action required</p>
                     </div>
                 </div>
             </div>
 
+            <!-- Middle Section: Chart & Map -->
             <div class="middle-section">
-                <div class="chart-container glass-panel fade-in-up" style="--delay: 0.5s">
+                <!-- Energy Chart using Chart.js -->
+                <div class="card chart-container">
                     <div class="panel-header">
-                        <h3>Energy Consumption & Savings</h3>
+                        <h3 id="chart-title">Energy Performance: All Zones</h3>
                         <div class="chart-controls">
-                            <button class="active">Daily</button><button>Weekly</button><button>Monthly</button>
+                            <button class="active" id="btn-daily">Daily</button>
+                            <button id="btn-weekly">Weekly</button>
                         </div>
                     </div>
                     <div class="canvas-wrapper">
@@ -102,47 +108,45 @@
                     </div>
                 </div>
 
-                <div class="map-container glass-panel fade-in-up" style="--delay: 0.6s">
+                <!-- Live Map / Zones visualization -->
+                <div class="card map-container">
                     <div class="panel-header">
-                        <h3>Live Zone Status</h3>
-                        <button class="icon-btn"><i class="fa-solid fa-expand"></i></button>
+                        <h3>Zone Sectors</h3>
+                        <button class="icon-btn-small" onclick="resetZones()" title="View All Zones"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
-                    <div class="zone-grid">
-                        <div class="zone-card active-zone tooltip" data-info="Downtown | 4,200 Lights | 98% Perf">
+                    <div class="zone-grid" id="zone-grid">
+                        <div class="zone-card" data-zone="dt" onclick="selectZone('dt')">
                             <div class="zone-icon"><i class="fa-solid fa-city"></i></div>
                             <div class="zone-name">Downtown</div>
-                            <div class="zone-status online-pulse"></div>
+                            <div class="zone-status online" id="status-dt"></div>
                         </div>
-                        <div class="zone-card active-zone tooltip" data-info="North Suburbs | 2,100 Lights | 100% Perf">
+                        <div class="zone-card" data-zone="nw" onclick="selectZone('nw')">
                             <div class="zone-icon"><i class="fa-solid fa-tree-city"></i></div>
                             <div class="zone-name">Northwood</div>
-                            <div class="zone-status online-pulse"></div>
+                            <div class="zone-status online" id="status-nw"></div>
                         </div>
-                        <div class="zone-card warning-zone tooltip" data-info="East Side | 1,800 Lights | 5 Faults">
+                        <div class="zone-card" data-zone="ei" onclick="selectZone('ei')">
                             <div class="zone-icon"><i class="fa-solid fa-industry"></i></div>
                             <div class="zone-name">East Ind.</div>
-                            <div class="zone-status warn-pulse"></div>
+                            <div class="zone-status online" id="status-ei"></div>
                         </div>
-                        <div class="zone-card error-zone tooltip" data-info="South End | 800 Lights | 12 Faults">
+                        <div class="zone-card" data-zone="se" onclick="selectZone('se')">
                             <div class="zone-icon"><i class="fa-solid fa-bridge"></i></div>
                             <div class="zone-name">South End</div>
-                            <div class="zone-status error-pulse"></div>
-                        </div>
-                        <div class="zone-card active-zone tooltip" data-info="West River | 3,550 Lights | 99% Perf">
-                            <div class="zone-icon"><i class="fa-solid fa-water"></i></div>
-                            <div class="zone-name">West River</div>
-                            <div class="zone-status online-pulse"></div>
+                            <div class="zone-status online" id="status-se"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Bottom Section: Controls & Logs -->
             <div class="bottom-section">
-                <div class="control-panel glass-panel fade-in-up" style="--delay: 0.7s">
+                <!-- Intelligent Brightness Control panel -->
+                <div class="card control-panel">
                     <div class="panel-header">
-                        <h3>Intelligent Brightness Control</h3>
+                        <h3>Intelligent Controls</h3>
                         <div class="toggle-switch">
-                            <span>Auto AI Mode</span>
+                            <span id="ai-mode-label" class="text-primary font-medium">Auto AI On</span>
                             <label class="switch">
                                 <input type="checkbox" checked id="autoModeToggle">
                                 <span class="slider round"></span>
@@ -152,48 +156,38 @@
                     <div class="sliders-container">
                         <div class="slider-group">
                             <label>Downtown <span class="val" id="val-dt">80%</span></label>
-                            <input type="range" class="glass-slider" min="0" max="100" value="80" disabled id="slider-dt">
+                            <input type="range" class="control-slider" min="0" max="100" value="80" disabled id="slider-dt" data-zone="dt">
                         </div>
                         <div class="slider-group">
                             <label>Northwood <span class="val" id="val-nw">60%</span></label>
-                            <input type="range" class="glass-slider" min="0" max="100" value="60" disabled id="slider-nw">
+                            <input type="range" class="control-slider" min="0" max="100" value="60" disabled id="slider-nw" data-zone="nw">
                         </div>
                         <div class="slider-group">
                             <label>East Ind. <span class="val" id="val-ei">100%</span></label>
-                            <input type="range" class="glass-slider" min="0" max="100" value="100" disabled id="slider-ei">
+                            <input type="range" class="control-slider" min="0" max="100" value="100" disabled id="slider-ei" data-zone="ei">
+                        </div>
+                        <div class="slider-group">
+                            <label>South End <span class="val" id="val-se">90%</span></label>
+                            <input type="range" class="control-slider" min="0" max="100" value="90" disabled id="slider-se" data-zone="se">
                         </div>
                     </div>
                 </div>
 
-                <div class="fault-log glass-panel fade-in-up" style="--delay: 0.8s">
+                <!-- Recent fault detection alerts -->
+                <div class="card fault-log">
                     <div class="panel-header">
-                        <h3>Recent Alerts</h3>
-                        <a href="#" class="view-all">View All</a>
+                        <h3>System Event Log</h3>
+                        <button class="btn-text" onclick="triggerSimulatedFault()">Simulate Fault</button>
                     </div>
                     <ul class="fault-list" id="faultList">
-                        <li class="fault-item new">
-                            <div class="fault-icon critical"><i class="fa-solid fa-unlink"></i></div>
+                        <!-- Initial Log Entry -->
+                        <li class="fault-item resolved">
+                            <div class="fault-icon bg-green"><i class="fa-solid fa-check"></i></div>
                             <div class="fault-info">
-                                <h4>Connection Lost</h4>
-                                <p>Node ID: #SE-7182 (South End)</p>
+                                <h4>System Boot Sequence</h4>
+                                <p>All nodes initialized and responding.</p>
                             </div>
-                            <span class="fault-time">2m ago</span>
-                        </li>
-                        <li class="fault-item">
-                            <div class="fault-icon warning"><i class="fa-solid fa-lightbulb"></i></div>
-                            <div class="fault-info">
-                                <h4>Bulb Failure</h4>
-                                <p>Node ID: #EI-2210 (East Ind.)</p>
-                            </div>
-                            <span class="fault-time">14m ago</span>
-                        </li>
-                        <li class="fault-item text-green">
-                            <div class="fault-icon resolved"><i class="fa-solid fa-check"></i></div>
-                            <div class="fault-info">
-                                <h4>Resolved: Power Spike</h4>
-                                <p>Grid Alpha Restored Automatically</p>
-                            </div>
-                            <span class="fault-time">1h ago</span>
+                            <span class="fault-time">Just now</span>
                         </li>
                     </ul>
                 </div>

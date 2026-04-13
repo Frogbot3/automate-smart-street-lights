@@ -1,194 +1,282 @@
+// Dashboard Global State
+const state = {
+    aiMode: true,
+    totalLights: 12450,
+    faults: 0,
+    selectedZone: 'all',
+    zones: {
+        'dt': { name: 'Downtown', brightness: 80, lights: 4200, status: 'online' },
+        'nw': { name: 'Northwood', brightness: 60, lights: 2100, status: 'online' },
+        'ei': { name: 'East Ind.', brightness: 100, lights: 1800, status: 'online' },
+        'se': { name: 'South End', brightness: 90, lights: 800, status: 'online' }
+    },
+    chartInstance: null
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     initChart();
-    initSliders();
-    simulateLiveData();
+    initControls();
+    updateDashboard();
 });
 
 function initChart() {
     const ctx = document.getElementById('energyChart').getContext('2d');
     
-    // Gradient for the chart line
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(0, 240, 255, 0.5)');
-    gradient.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
-
-    // Common styling
-    Chart.defaults.color = '#94a3b8';
+    // Dynamic chart color based on theme
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
     Chart.defaults.font.family = "'Inter', sans-serif";
 
-    new Chart(ctx, {
+    state.chartInstance = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [{
-                label: 'Energy Consumption (kWh)',
-                data: [1200, 1150, 1100, 1050, 1080, 950, 900],
-                borderColor: '#00f0ff',
-                backgroundColor: gradient,
-                borderWidth: 3,
-                pointBackgroundColor: '#070b19',
-                pointBorderColor: '#00f0ff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                fill: true,
-                tension: 0.4
-            },
-            {
-                label: 'Projected Baseline (No AI)',
-                data: [1300, 1300, 1300, 1300, 1300, 1300, 1300],
-                borderColor: 'rgba(244, 63, 94, 0.5)',
-                borderWidth: 2,
-                borderDash: [5, 5],
-                pointRadius: 0,
-                fill: false,
-                tension: 0
-            }]
-        },
+        data: getChartDataForZone('all'),
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        boxWidth: 8
-                    }
-                },
+                legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } },
                 tooltip: {
-                    backgroundColor: 'rgba(10, 15, 30, 0.9)',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#f8fafc',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
-                    padding: 12,
+                    backgroundColor: '#0f172a',
+                    padding: 10,
                     displayColors: true
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)',
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    }
-                }
+                y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+                x: { grid: { display: false } }
             },
-            interaction: {
-                intersect: false,
-                mode: 'index',
-            },
+            interaction: { intersect: false, mode: 'index' }
         }
-    });
-
-    // Handle Chart Buttons
-    const buttons = document.querySelectorAll('.chart-controls button');
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            buttons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
     });
 }
 
-function initSliders() {
-    const autoModeToggle = document.getElementById('autoModeToggle');
-    const sliders = document.querySelectorAll('.glass-slider');
-    const values = {
-        'slider-dt': document.getElementById('val-dt'),
-        'slider-nw': document.getElementById('val-nw'),
-        'slider-ei': document.getElementById('val-ei')
+function getChartDataForZone(zoneKey) {
+    // Generate dummy data based on selection
+    let base = 1000;
+    let label = 'Energy Consumption (kWh)';
+    
+    if(zoneKey !== 'all') {
+        const factor = state.zones[zoneKey].lights / state.totalLights;
+        base = Math.round(1000 * factor);
+    }
+
+    // If AI is off, consumption goes up artificially
+    const multiplier = state.aiMode ? 1 : 1.25;
+
+    return {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+            label: label,
+            data: [base*1.1, base*0.9, base*1.05, base*0.85, base*0.95, base*0.8, base*0.75].map(v => v * multiplier),
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            borderWidth: 2,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#0ea5e9',
+            fill: true,
+            tension: 0.4
+        },
+        {
+            label: 'Projected Baseline',
+            data: [base*1.2, base*1.2, base*1.2, base*1.2, base*1.2, base*1.2, base*1.2],
+            borderColor: '#94a3b8',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false,
+            tension: 0
+        }]
+    };
+}
+
+function updateChart() {
+    if(state.chartInstance) {
+        state.chartInstance.data = getChartDataForZone(state.selectedZone);
+        state.chartInstance.update();
+    }
+}
+
+function initControls() {
+    // Select Zones
+    window.selectZone = function(zoneKey) {
+        document.querySelectorAll('.zone-card').forEach(c => c.classList.remove('selected'));
+        
+        if (state.selectedZone === zoneKey) {
+            // Deselect
+            state.selectedZone = 'all';
+            document.getElementById('chart-title').textContent = 'Energy Performance: All Zones';
+        } else {
+            state.selectedZone = zoneKey;
+            document.querySelector(`.zone-card[data-zone="${zoneKey}"]`).classList.add('selected');
+            document.getElementById('chart-title').textContent = `Energy Performance: ${state.zones[zoneKey].name}`;
+        }
+        updateChart();
     };
 
-    // Toggle Auto AI mode
-    autoModeToggle.addEventListener('change', (e) => {
-        const isAuto = e.target.checked;
-        sliders.forEach(slider => {
-            slider.disabled = isAuto;
-        });
-        
-        if (isAuto) {
-            // Restore to AI optimized values visually
-            simulateAIAdjustment();
-        }
-    });
+    // Reset Zones
+    window.resetZones = function() {
+         document.querySelectorAll('.zone-card').forEach(c => c.classList.remove('selected'));
+         state.selectedZone = 'all';
+         document.getElementById('chart-title').textContent = 'Energy Performance: All Zones';
+         updateChart();
+    };
 
-    // Update value displays
+    // Sliders
+    const sliders = document.querySelectorAll('.control-slider');
     sliders.forEach(slider => {
         slider.addEventListener('input', (e) => {
-            const valDisplay = values[e.target.id];
-            if (valDisplay) {
-                valDisplay.textContent = e.target.value + '%';
-            }
+            const z = e.target.getAttribute('data-zone');
+            state.zones[z].brightness = parseInt(e.target.value);
+            document.getElementById(`val-${z}`).textContent = e.target.value + '%';
+            updateDashboard();
         });
     });
 
-    function simulateAIAdjustment() {
-        // Automatically smoothly adjust sliders back to "AI efficient" levels
-        const aiTargets = {
-            'slider-dt': 80,
-            'slider-nw': 60,
-            'slider-ei': 100
-        };
-
-        sliders.forEach(slider => {
-            const target = aiTargets[slider.id];
-            slider.value = target;
-            const valDisplay = values[slider.id];
-            if(valDisplay) valDisplay.textContent = target + '%';
-        });
-    }
-}
-
-function simulateLiveData() {
-    // Random pulses for active zones to make it feel alive
-    const zones = document.querySelectorAll('.zone-status');
-    
-    setInterval(() => {
-        const randomZone = zones[Math.floor(Math.random() * zones.length)];
-        // Temporarily brighten the glow
-        randomZone.style.filter = 'brightness(1.8)';
+    // Auto AI Toggle
+    const autoToggle = document.getElementById('autoModeToggle');
+    autoToggle.addEventListener('change', (e) => {
+        state.aiMode = e.target.checked;
+        document.getElementById('ai-mode-label').textContent = state.aiMode ? 'Auto AI On' : 'Manual Override';
+        document.getElementById('ai-mode-label').className = state.aiMode ? 'text-primary font-medium' : 'text-muted font-medium';
         
-        setTimeout(() => {
-            randomZone.style.filter = 'brightness(1)';
-        }, 500);
-    }, 2000);
+        // Enable/disable sliders
+        sliders.forEach(s => s.disabled = state.aiMode);
 
-    // Simulate arriving of a new fault log after 5s
-    setTimeout(() => {
-        addNewFaultLog();
-    }, 5000);
+        if(state.aiMode) {
+            // Snap back to optimized values
+            const aiVals = { dt: 80, nw: 60, ei: 100, se: 90 };
+            sliders.forEach(s => {
+                const z = s.getAttribute('data-zone');
+                s.value = aiVals[z];
+                state.zones[z].brightness = aiVals[z];
+                document.getElementById(`val-${z}`).textContent = aiVals[z] + '%';
+            });
+        }
+        updateDashboard();
+        updateChart();
+    });
 }
 
-function addNewFaultLog() {
-    const faultList = document.getElementById('faultList');
+function updateDashboard() {
+    // Calculate global brightness average mapped to lights count
+    let totalWeightedBrightness = 0;
+    let trackableLights = 0;
     
-    // Create new list item
+    for (let key in state.zones) {
+        totalWeightedBrightness += (state.zones[key].brightness * state.zones[key].lights);
+        trackableLights += state.zones[key].lights;
+    }
+    
+    const avgBrightness = Math.round(totalWeightedBrightness / trackableLights);
+    document.getElementById('stat-active').textContent = avgBrightness + '%';
+
+    // Calculate energy saved (simulated logic based on brightness vs 100%)
+    const maxEnergy = 6.0; // MW if everything 100%
+    const currentEnergy = maxEnergy * (avgBrightness / 100);
+    let saved = maxEnergy - currentEnergy;
+    
+    if(!state.aiMode) saved = saved * 0.5; // Penalty for manual
+
+    document.getElementById('stat-saved').textContent = saved.toFixed(1) + ' MW';
+}
+
+// Fault Simulation Logic
+let faultCounter = 100;
+window.triggerSimulatedFault = function() {
+    const zonesList = Object.keys(state.zones);
+    const targetZone = zonesList[Math.floor(Math.random() * zonesList.length)];
+    const zoneName = state.zones[targetZone].name;
+    const faultId = `F-${faultCounter++}`;
+    
+    state.faults++;
+    state.zones[targetZone].status = 'error';
+    
+    // Update UI Counters
+    document.getElementById('stat-faulty').textContent = state.faults;
+    document.getElementById('trend-faulty').textContent = `${state.faults} action required`;
+    document.getElementById('nav-fault-badge').textContent = state.faults;
+    document.getElementById('nav-fault-badge').style.display = 'block';
+    
+    // Flash card
+    const faultCard = document.getElementById('card-faulty');
+    faultCard.classList.remove('danger-flash');
+    void faultCard.offsetWidth; // trigger reflow
+    faultCard.classList.add('danger-flash');
+
+    // Update Map Status
+    document.getElementById(`status-${targetZone}`).className = 'zone-status error';
+
+    // Spawn Log
     const li = document.createElement('li');
-    li.className = 'fault-item new';
-    li.style.animation = 'fadeInUp 0.5s ease-out';
-    
+    li.className = 'fault-item new-fault';
+    li.id = `log-${faultId}`;
     li.innerHTML = `
-        <div class="fault-icon warning"><i class="fa-solid fa-temperature-arrow-up"></i></div>
+        <div class="fault-icon bg-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
         <div class="fault-info">
-            <h4>Overheating Alert</h4>
-            <p>Node ID: #NW-998 (Northwood)</p>
+            <h4>Node Failure Required</h4>
+            <p>Node ID: #${targetZone.toUpperCase()}-${Math.floor(Math.random()*9000)+1000} (${zoneName})</p>
         </div>
-        <span class="fault-time">Just now</span>
+        <div class="fault-time">
+            <span>Just now</span>
+            <button class="btn-resolve" onclick="resolveFault('${faultId}', '${targetZone}', this)">Resolve</button>
+        </div>
     `;
 
-    // Insert at top
-    faultList.insertBefore(li, faultList.firstChild);
+    const list = document.getElementById('faultList');
+    list.insertBefore(li, list.firstChild);
+};
+
+window.resolveFault = function(faultId, zoneKey, btnElement) {
+    if(state.faults > 0) state.faults--;
     
-    // Remove the last item to keep UI clean
-    if(faultList.children.length > 3) {
-        faultList.removeChild(faultList.lastChild);
+    // Update counters
+    document.getElementById('stat-faulty').textContent = state.faults;
+    document.getElementById('trend-faulty').textContent = `${state.faults} action required`;
+    
+    if(state.faults === 0) {
+        document.getElementById('nav-fault-badge').style.display = 'none';
+    } else {
+        document.getElementById('nav-fault-badge').textContent = state.faults;
     }
+
+    // Set map status back to online (assuming no other faults, simplification)
+    state.zones[zoneKey].status = 'online';
+    document.getElementById(`status-${zoneKey}`).className = 'zone-status online';
+
+    // Update log UI
+    const li = document.getElementById(`log-${faultId}`);
+    li.className = 'fault-item';
+    li.querySelector('.fault-icon').className = 'fault-icon bg-green';
+    li.querySelector('.fault-icon i').className = 'fa-solid fa-check';
+    li.querySelector('h4').textContent = 'Node Restored';
+    btnElement.remove(); // remove resolve button
+};
+
+function initTheme() {
+    const themeBtn = document.getElementById('theme-toggle');
+    const icon = themeBtn.querySelector('i');
+    
+    // Check for saved theme
+    const savedTheme = localStorage.getItem('lumi-theme');
+    if(savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        icon.className = 'fa-solid fa-sun';
+    }
+    
+    themeBtn.addEventListener('click', () => {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        if(isDark) {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('lumi-theme', 'light');
+            icon.className = 'fa-solid fa-moon';
+            Chart.defaults.color = '#64748b';
+        } else {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('lumi-theme', 'dark');
+            icon.className = 'fa-solid fa-sun';
+            Chart.defaults.color = '#94a3b8';
+        }
+        if(state.chartInstance) state.chartInstance.update();
+    });
 }
